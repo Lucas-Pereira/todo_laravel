@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/cabecalho.css">
+    <title>Tarefas</title>
+</head>
+<bod>
+
+    <header>
+        <menu>
+            <a href="projeto.html">Projeto</a>
+            <a href="http:#" id="float">Sair</a>
+        </menu>
+    </header>
+    <script>
+
+
+        function excluir(id) {
+
+            let header = new Headers();
+            header.append('Authorization', window.localStorage.getItem('token'));
+            options = {
+                headers: header,
+                method: "DELETE",
+                'Access-Control-Allow-Origin': '*'
+            }
+
+            fetch('http://localhost:8080/tarefa/' + id, options)
+                .then(async function (response) {
+                    exclusao = await response;
+                    if (exclusao.status == 200) {
+                        tarefa();
+                        console.log("funcionou => ");
+                    }
+                    if (response.status == 400) {
+                        error = await response.json();
+
+                        errorContainer = document.getElementById("error");
+                        errorContainer.style.display = "block";
+                        document.getElementById("error_message").innerHTML = error.error;
+
+                        document.getElementById("closeButtonError").onclick = function () {
+                            errorContainer.style.display = "none";
+                        }
+                    }
+
+                });
+        }
+
+        function cancelar() {
+            adicionarBody = document.getElementById("adicionarContent");
+            adicionarBody.style.display = "none";
+            //zerar os inputs
+            tarefa();
+            //resetar inputs
+        }
+
+
+        async function tarefa() {
+
+            let header = new Headers();
+            header.append('Authorization', window.localStorage.getItem('token'))
+            const options = {
+                method: "GET",
+                headers: header,
+            }
+
+            const resultado = await fetch('http://localhost:8080/tarefa', options);
+            //console.log('resultado',resultado);
+
+            const json = await resultado.json();
+            //console.log('json',json);
+
+            //document.getElementById('tarefas').innerHTML = JSON.stringify(json);
+
+            let tabela = "";
+            let dataHead = "<table class='w3-table w3-striped'>"
+                + "<tr>"
+                + "<th>Nome</th>"
+                + "<th>Descrição</th>"
+                + "<th>Completo</th>"
+                + "<th>Ações</th>"
+                + "</tr>";
+
+            tabela += dataHead;
+            for (i = 0; i < json.length; i++) {
+
+                //+"<td>"+json[i].id+"</td>"
+                dataBody = "<tr>"
+                    + "<td>" + json[i].nome + "</td>"
+                    + "<td>" + json[i].descricao + "</td>"
+                    + "<td>" + json[i].descricao + "</td>"
+                    + "<td>"
+                    + "<button class='w3-button w3-yellow' onclick=editar(" + json[i].id + ")>Editar</button>"
+                    + "<button class='w3-button w3-red' onclick=excluir(" + json[i].id + ") id ='excluir'>excluir</button>"
+                    + "</td>"
+                    + "</tr>";
+
+
+                tabela += dataBody;
+
+            }
+
+            tabela += "</table>";
+
+
+            document.getElementById('resultado').innerHTML = tabela;
+
+            console.log(json.length);
+            console.log(json[0].id);
+            console.log(json[0].nome);
+            console.log(json[0].descricao);
+        }// fim função
+
+
+
+        //*********************************////
+
+        function adicionar() {
+
+            adicionarBody = document.getElementById("adicionarContent");
+            adicionarBody.style.display = "block";
+        }
+
+        function editar() {
+            adicionar();
+        }
+
+        //----------------------------////
+        async function criarTarefa() {
+
+            selector = document.getElementById("selector");
+
+            let projetoId;
+
+            tarefa = {
+                nome: document.getElementById("nome").value,
+                descricao: document.getElementById("descricao").value,
+                completo: false,
+                prioridade: document.getElementById("prioridade").value,
+                projeto: {
+                    id: selector.value
+                }
+
+            }
+            console.log(tarefa);
+
+            let header = new Headers();
+            header.append('Authorization', window.localStorage.getItem('token'))
+            header.append("Content-type", "application/json");
+            const options = {
+                method: "POST",
+                headers: header,
+                body: JSON.stringify(tarefa)
+            }
+
+            response = await fetch("http://localhost:8080/tarefa", options);
+            if (response.status == 201) {
+                alert("Tarefa criada com sucesso");
+            }
+            if (response.status == 400) {
+                error = await response.json();
+
+                errorContainer = document.getElementById("error");
+                errorContainer.style.display = "block";
+                document.getElementById("error_message").innerHTML = error.error;
+
+                document.getElementById("closeButtonError").onclick = function () {
+                    errorContainer.style.display = "none";
+                }
+            }
+
+        }
+
+        //******************************************//
+
+        async function getTarefas() {
+
+            let header = new Headers();
+            header.append('Authorization', window.localStorage.getItem('token'))
+            const options = {
+                method: "GET",
+                headers: header,
+            }
+
+
+            const resultado = await fetch('http://localhost:8080/projeto', options)
+            const listaDeProjetos = await resultado.json();
+
+            console.log(listaDeProjetos);
+
+
+            //<option value="3">Option 3</option>
+
+
+
+            selector = document.getElementById('selector');
+
+            for (i = 0; i < listaDeProjetos.length; i++) {
+                //options = "<option value="+lista.id+">"+lista.nome+"</option>";
+                option = new Option(listaDeProjetos[i].nome, listaDeProjetos[i].id);
+                selector.add(option);
+            }
+
+        }
+
+        getTarefas();
+
+        /*const tarefa = fetch('http://localhost:8080/tarefas', {headers})
+         .then(response => response.json())
+         .then(data => console.log(data))
+         .catch(error => console.error('Error:', error));
+         
+         console.log(tarefa);
+         window.alert(tarefa);*/
+        tarefa();
+    </script>
+
+
+    <p>
+    <h3 style="color: tomato "> Lista de tarefas</h3>
+    </p>
+    <button class="w3-button w3-circle w3-teal botaoAdicionar" id="float" onclick="adicionar()">+</button>
+
+    <div class="w3-container edit-container w3-card " id="adicionarContent" style="display: none;" style="width:60%">
+        <h3>Adicionar tarefas</h3>
+        <div class="w3-container" width="50vw">
+            <label class="w3-text"><b>Nome</b></label>
+            <input class="w3-input w3-border w3-light-grey" type="text" id="nome">
+
+            <label class="w3-text"><b>Prioridade</b></label>
+            <input class="w3-input w3-border w3-light-grey" type="text" id="prioridade">
+
+            <label class="w3-text"><b>Descição</b></label>
+            <textarea class="w3-input w3-border w3-light-grey" name="w3review" rows="4" cols="50"
+                id="descricao"></textarea>
+
+            <select class="w3-select w3-border w3-margin-top" name="projeto" id="selector">
+                <option value="" disabled selected>Vincular a um projeto</option>
+            </select>
+
+            <div id="button">
+                <button class="w3-btn w3-blue-grey" onclick="criarTarefa()">Adicionar</button>
+                <button class="w3-btn w3-yellow" onclick="cancelar()">Cancelar</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 
+    Nome: Fazer compras
+    Prioridade: 1    Completo? Não
+    Descrição: Leite, Frango, Carne, Pão, Arroz, Feijão
+
+    Nome: Fazer compras
+    Prioridade: 1    Completo? Não
+    Descrição: Leite, Frango, Carne, Pão, Arroz, Feijão
+
+    Nome: Fazer compras
+    Prioridade: 1    Completo? Não
+    Descrição: Leite, Frango, Carne, Pão, Arroz, Feijão
+
+    Nome: Fazer compras
+    Prioridade: 1    Completo? Não
+    Descrição: Leite, Frango, Carne, Pão, Arroz, Feijão
+    -->
+
+    <div class="w3-container">
+        <span id="resultado"></span>
+    </div>
+
+    <div id="error" style="text-align: center; width: 50%; display: none;"
+        class="w3-card w3-red w3-padding-16 w3-margin w3-display-topmiddle">
+        <p id="error_message"></p>
+        <button class="w3-button w3-red w3-card w3-display-topright  w3-padding" id="closeButtonError">X</button>
+    </div>
+
+
+    </body>
+
+</html>

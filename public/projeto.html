@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="css/cabecalho.css">
+    <link rel="stylesheet" href="css/projeto.css">
+    <title>Projeto</title>
+</head>
+
+<body>
+
+    <header>
+        <menu>
+            <a href="tarefa.html">Tarefas</a>
+            <a href="http:#" id="float">Sair</a>
+        </menu>
+    </header>
+    <script type="module">
+
+        async function criarProjeto() {
+
+            let projeto = document.getElementById("nome").value;
+            if (projeto == "") {
+                alert("Projeto não pode ser vazio")
+                return;
+            }
+            let header = new Headers();
+            header.append('Authorization', window.localStorage.getItem('token'))
+            header.append("Content-type", "application/json");
+            const options = {
+                method: "POST",
+                headers: header,
+                body: JSON.stringify(projeto)
+            }
+
+            response = await fetch("http://localhost:8080/projeto", options);
+            if (response.status == 201) {
+
+                console.log(projeto);
+                alert("projeto criada com sucesso");
+                projeto.textContent = "";
+                window.listarProjetos();
+                
+            } else {
+                let error = await response.json();
+
+                let errorContainer = document.getElementById("error");
+                errorContainer.style.display = "block";
+                document.getElementById("error_message").innerHTML = error.error;
+
+                document.getElementById("closeButtonError").onclick = function () {
+                    errorContainer.style.display = "none";
+                }
+            }
+
+        }// FIM FUNÇÃO ADICIONAR
+
+
+        window.listarTarefas = async function (id_projeto) {
+
+            let header = new Headers();
+            header.append('Authorization', window.localStorage.getItem('token'))
+            const options = {
+                method: "GET",
+                headers: header,
+            }
+
+            const resultado = await fetch("http://localhost:8080/projeto/" + id_projeto + "/tarefas", options);
+            //console.log('resultado',resultado);
+
+            const json = await resultado.json();
+            //console.log('json',json);
+
+            //document.getElementById('tarefas').innerHTML = JSON.stringify(json);
+
+            let tabela = "";
+            let dataHead = "<table class='w3-table w3-striped w3-card'>"
+                + "<tr>"
+                + "<th>Nome</th>"
+                + "<th>Descrição</th>"
+                + "<th>Completo</th>"
+                + "</tr>";
+
+            tabela += dataHead;
+
+
+
+            for (let i = 0; i < json.length; i++) {
+
+                let dataBody = "<tr>"
+                    + "<td>" + json[i].nome + "</td>"
+                    + "<td>" + json[i].descricao + "</td>"
+                    + "<td>" + (json[i].completo ? "sim" : "não") + "</td>"
+                    + "</tr>";
+
+
+                tabela += dataBody;
+
+            }
+
+            tabela += "</table>";
+
+            document.getElementById('resultado').innerHTML = tabela;
+            if (json.length <= 0) {
+                let semProjetosMensagem = "<div class='w3-card w3-padding-16 w3-center' > Não há tarefas vinculas a este projeto </div>"
+                document.getElementById("resultado").innerHTML = semProjetosMensagem;
+            }
+
+
+            console.log(json.length);
+            console.log(json[0].id);
+            console.log(json[0].nome);
+            console.log(json[0].descricao);
+
+
+        }// fim função
+
+
+
+        window.listarProjetos = async function () {
+
+            let header = new Headers();
+            header.append('Authorization', window.localStorage.getItem('token'))
+            const options = {
+                method: "GET",
+                headers: header,
+            }
+
+            const response = await fetch('http://localhost:8080/projeto', options);
+            const projetos = await response.json();
+            console.log(projetos);
+            let lista = "";
+
+
+            for (let i = 0; i < projetos.length; i++) {
+                lista += "<li class='w3-hover-blue projeto' style='text-transform:uppercase;' onclick=listarTarefas(" + projetos[i].id + ") value =" + i + ">" + projetos[i].nome
+                    + "<div class=''>"
+                    + "<button id='editar' class='w3-button w3-circle  w3-yellow' onclick=mostrarTelaEdicao(" + projetos[i].id + ")><i class='material-icons'>edit</i></button>"
+                    + "<button class='w3-button w3-circle w3-red w3-margin' onclick=excluir(" + projetos[i].id + ") id ='excluir'><i class='material-icons'>delete</i></button>"
+                    + "</div>";
+                +"</li>"
+            }
+            document.getElementById("lista").innerHTML = lista;
+
+            return projetos;
+        }
+
+        /* */
+        /*excluir*/
+        function excluir(id) {
+
+            let header = new Headers();
+            header.append('Authorization', window.localStorage.getItem('token'));
+            options = {
+                headers: header,
+                method: "DELETE",
+                'Access-Control-Allow-Origin': '*'
+            }
+
+            fetch('http://localhost:8080/projeto/' + id, options)
+                .then(async function (response) {
+                    exclusao = await response;
+                    if (exclusao.status == 200) {
+
+                        console.log("funcionou => ");
+                        window.listarProjetos();
+                    }
+                    if (response.status == 400) {
+                        let error = await response.json();
+
+                        let errorContainer = document.getElementById("error");
+                        errorContainer.style.display = "block";
+                        document.getElementById("error_message").innerHTML = error.error;
+
+                        document.getElementById("closeButtonError").onclick = function () {
+                            errorContainer.style.display = "none";
+                        }
+                    }
+
+                });
+        }
+
+        window.mostrarTelaEdicao = function (id) 
+        {
+            console.log('projetos na edicao', projetos);
+            console.log('buscando projeto # ', id);
+            // mostrar a tela de edição
+            let tela = document.getElementById('modalEditarProjeto');
+            tela.style.display="block";
+
+            // desafio fazer com foreach
+            let projetoEditar = null;
+            for (let i = 0; i < projetos.length; i++){
+                console.log('projeto # ', projetos[i].id);
+                if(projetos[i].id == id){
+                    console.log('achei!');
+                    projetoEditar = projetos[i];
+                    break;
+                }
+            }
+            // colocar o projeto.nome dentro do value do input nomeEdicao
+            // value do input nomeEdicao = projeto.nome (projetoEditar.nome)
+            document.getElementById('nomeEdicao').value = projetoEditar.nome;
+            document.getElementById('idEdicao').value = projetoEditar.id;
+            // document.getElementById('idEdicao').value = id; // mesma coisa
+        }
+
+        window.editarProjeto = function () {
+            let header = new Headers();
+            let nome = document.getElementById("nomeEdicao").value;
+            let id = document.getElementById("idEdicao").value;
+
+            header.append('Authorization', window.localStorage.getItem('token'));
+            header.append("Content-type", "application/json");
+            let options = {
+                headers: header,
+                method: "PUT",
+                'Access-Control-Allow-Origin': '*',
+                body: JSON.stringify(nome)
+            }
+
+            fetch('http://localhost:8080/projeto/' + id, options)
+                .then(async function (response) {
+                    let edicao = await response;
+                    if (edicao.status == 200) {
+                        window.listarProjetos();
+                        console.log("funcionou => ");
+                    }
+                    if (response.status == 400) {
+                        let error = await response.json();
+
+                        let errorContainer = document.getElementById("error");
+                        errorContainer.style.display = "block";
+                        document.getElementById("error_message").innerHTML = error.error;
+
+                        document.getElementById("closeButtonError").onclick = function () {
+                            errorContainer.style.display = "none";
+                        }
+                    }
+
+                });
+        }
+
+        const projetos = await window.listarProjetos();
+
+
+        window.abrirModalNovoProjeto = function () {
+            document.getElementById('id01').style.display = 'block';
+        }
+
+        window.fecharModalNovoProjeto = function () {
+            document.getElementById('id01').style.display = 'none';
+            document.getElementById('nome').value = '';
+        }
+
+        window.fecharModalEditarProjeto = function () {
+            document.getElementById('modalEditarProjeto').style.display = 'none';
+            document.getElementById('nome').value = '';
+        }
+
+    </script>
+
+    <div class="w3-container w3-padding container " style="width: 100vw;">
+
+        <div class="w3-card w3-flat-turquoise w3-container" style="width:40%;">
+
+            <div class="title">
+                <!-- botao abrir -->
+                <button class="w3-button w3-circle w3-teal" style="float: right;" onclick="abrirModalNovoProjeto()">+</button>
+
+                <!-- modal novo projeto -->
+                <div id="id01" class="w3-modal w3-animate-opacity">
+                    <div class="w3-modal-content w3-card-4">
+                        <header class="w3-container w3-teal">
+                            <span onclick="fecharModalNovoProjeto()"
+                                class="w3-button w3-large w3-display-topright">&times;</span>
+                            <h2>Adicionar Projeto</h2>
+                        </header>
+                        <div class="w3-container w3-padding">
+                            <label class="w3-text"><b>Nome</b></label>
+                            <input class="w3-input w3-border w3-light-grey" type="text" id="nome">
+                        </div>
+                        <footer class="w3-container w3-teal">
+                            <div id="button">
+                                <button class="w3-btn w3-blue-grey" onclick="criarProjeto()">Adicionar</button>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+
+                <!-- modal editar projeto -->
+                <div id="modalEditarProjeto" class="w3-modal w3-animate-opacity">
+                    <div class="w3-modal-content w3-card-4">
+                        <header class="w3-container w3-teal">
+                            <h2>Editar Projeto</h2>
+                            <span onclick="fecharModalEditarProjeto()" class="w3-button w3-large w3-display-topright">&times;</span>
+                        </header>
+                        <div class="w3-container w3-padding">
+                            <label class="w3-text"><b>Nome</b></label>
+                            <input class="w3-input w3-border w3-light-grey" type="text" id="nomeEdicao">
+
+                            <input type="text" disabled id="idEdicao">
+                        </div>
+                        <footer class="w3-container w3-teal">
+                            <div id="button">
+                                <button class="w3-btn w3-blue-grey" onclick="editarProjeto()">Salvar</button>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+
+                <h2>Projetos</h2>
+                <div class="w3-padding">
+                    <ul class="w3-ul" id="lista" style="margin-bottom: 20px;">
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="w3-container" style="width:60%;">
+            <div class="title">
+                <h2>Tarefas</h2>
+            </div>
+            <div class="tarefas">
+                <p id="resultado"></p>
+            </div>
+        </div>
+
+
+        <div id="error" style="text-align: center; width: 50%; display: none;"
+            class="w3-card w3-red w3-padding-16 w3-margin w3-display-topmiddle w3-animate-top">
+            <p id="error_message"></p>
+            <button class="w3-button w3-red w3-card w3-display-topright  w3-padding"
+                id="closeButtonError">X</button>
+        </div>
+    </div>
+</body>
+
+</html>
