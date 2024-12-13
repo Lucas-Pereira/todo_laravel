@@ -17,10 +17,18 @@
     <header>
         <menu>
             <a href="tarefa.html">Tarefas</a>
-            <a href="http:#" id="float">Sair</a>
+            <a href="http:#" onclick="sair()" id="float">Sair</a>
         </menu>
     </header>
     <script type="module">
+
+        import authenticationService from './js/servicos/AuthenticationService.js';
+        
+        window.sair = function () {
+            authenticationService.eraseToken();
+            window.location.replace("index.html");
+            alert('vamos sair');
+        }
 
         async function criarProjeto() {
 
@@ -38,7 +46,7 @@
                 body: JSON.stringify(projeto)
             }
 
-            response = await fetch("http://localhost:8080/projeto", options);
+            response = await fetch("http://localhost:8080/api/projeto", options);
             if (response.status == 201) {
 
                 console.log(projeto);
@@ -70,7 +78,7 @@
                 headers: header,
             }
 
-            const resultado = await fetch("http://localhost:8080/projeto/" + id_projeto + "/tarefas", options);
+            const resultado = await fetch("http://localhost:8080/api/projeto/" + id_projeto + "/tarefas", options);
             //console.log('resultado',resultado);
 
             const json = await resultado.json();
@@ -131,7 +139,7 @@
                 headers: header,
             }
 
-            const response = await fetch('http://localhost:8080/projeto', options);
+            const response = await fetch('http://localhost:8080/api/projeto', options);
             const projetos = await response.json();
             console.log(projetos);
             let lista = "";
@@ -162,7 +170,7 @@
                 'Access-Control-Allow-Origin': '*'
             }
 
-            fetch('http://localhost:8080/projeto/' + id, options)
+            fetch('http://localhost:8080/api/projeto/' + id, options)
                 .then(async function (response) {
                     exclusao = await response;
                     if (exclusao.status == 200) {
@@ -224,7 +232,7 @@
                 body: JSON.stringify(nome)
             }
 
-            fetch('http://localhost:8080/projeto/' + id, options)
+            fetch('http://localhost:8080/api/projeto/' + id, options)
                 .then(async function (response) {
                     let edicao = await response;
                     if (edicao.status == 200) {

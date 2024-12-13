@@ -30,7 +30,7 @@
                 'Access-Control-Allow-Origin': '*'
             }
 
-            fetch('http://localhost:8080/tarefa/' + id, options)
+            fetch('http://localhost:8080/api/tarefa/' + id, options)
                 .then(async function (response) {
                     exclusao = await response;
                     if (exclusao.status == 200) {
@@ -70,7 +70,7 @@
                 headers: header,
             }
 
-            const resultado = await fetch('http://localhost:8080/tarefa', options);
+            const resultado = await fetch('http://localhost:8080/api/tarefa', options);
             //console.log('resultado',resultado);
 
             const json = await resultado.json();
@@ -159,7 +159,7 @@
                 body: JSON.stringify(tarefa)
             }
 
-            response = await fetch("http://localhost:8080/tarefa", options);
+            response = await fetch("http://localhost:8080/api/tarefa", options);
             if (response.status == 201) {
                 alert("Tarefa criada com sucesso");
             }
@@ -189,7 +189,7 @@
             }
 
 
-            const resultado = await fetch('http://localhost:8080/projeto', options)
+            const resultado = await fetch('http://localhost:8080/api/projeto', options)
             const listaDeProjetos = await resultado.json();
 
             console.log(listaDeProjetos);
@@ -211,7 +211,7 @@
 
         getTarefas();
 
-        /*const tarefa = fetch('http://localhost:8080/tarefas', {headers})
+        /*const tarefa = fetch('http://localhost:8080/api/tarefas', {headers})
          .then(response => response.json())
          .then(data => console.log(data))
          .catch(error => console.error('Error:', error));
