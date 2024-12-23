@@ -23,7 +23,7 @@
     <script type="module">
 
         import authenticationService from './js/servicos/AuthenticationService.js';
-        
+
         window.sair = function () {
             authenticationService.eraseToken();
             window.location.replace("index.html");
@@ -46,14 +46,14 @@
                 body: JSON.stringify(projeto)
             }
 
-            response = await fetch("http://localhost:8080/api/projeto", options);
+            response = await fetch("http://localhost:8000/api/projeto", options);
             if (response.status == 201) {
 
                 console.log(projeto);
                 alert("projeto criada com sucesso");
                 projeto.textContent = "";
                 window.listarProjetos();
-                
+
             } else {
                 let error = await response.json();
 
@@ -78,7 +78,7 @@
                 headers: header,
             }
 
-            const resultado = await fetch("http://localhost:8080/api/projeto/" + id_projeto + "/tarefas", options);
+            const resultado = await fetch("http://localhost:8000/api/projeto/" + id_projeto + "/tarefas", options);
             //console.log('resultado',resultado);
 
             const json = await resultado.json();
@@ -139,7 +139,7 @@
                 headers: header,
             }
 
-            const response = await fetch('http://localhost:8080/api/projeto', options);
+            const response = await fetch('http://localhost:8000/api/projeto', options);
             const projetos = await response.json();
             console.log(projetos);
             let lista = "";
@@ -170,7 +170,7 @@
                 'Access-Control-Allow-Origin': '*'
             }
 
-            fetch('http://localhost:8080/api/projeto/' + id, options)
+            fetch('http://localhost:8000/api/projeto/' + id, options)
                 .then(async function (response) {
                     exclusao = await response;
                     if (exclusao.status == 200) {
@@ -193,7 +193,7 @@
                 });
         }
 
-        window.mostrarTelaEdicao = function (id) 
+        window.mostrarTelaEdicao = function (id)
         {
             console.log('projetos na edicao', projetos);
             console.log('buscando projeto # ', id);

@@ -5,14 +5,28 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Tarefa;
 use App\Models\User;
+use Laravel\Sanctum\PersonalAccessToken;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class TarefaController extends Controller
 {
-    public function index(){
+    public function index(Request $request){
+
+        var_dump($request);
+        $bearToken = $request->authorization;
+        $token= PersonalAccessToken::findToken($bearToken);
+
+        if(!$token){
+            throw new BadRequestException("Token não existe");
+        }
+
+        $user = $token->tokenable();
+
+
         $tarefa = Tarefa::all();
 
         return response()->json([
-           $tarefa
+           $bearToken
         ]);
 
 

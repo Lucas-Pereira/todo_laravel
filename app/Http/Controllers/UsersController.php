@@ -43,7 +43,7 @@ class UsersController extends Controller
     {
         try {
             $this->validateLoginFields($request);
-            
+
             $email = $request->email;
             $user = User::where('email', '=', $email)->first();
             if($user == null) throw new BadRequestException("Usuario não encontrado!");
@@ -54,14 +54,15 @@ class UsersController extends Controller
             //     $user->save();
             // }
 
-            if(Hash::check($request->senha, $user->senha)){//compara senha
+           if(Hash::check($request->senha, $user->senha)){//compara senha
+                //token-name é o nome do token
                 $token = $user->createToken('token-name');//->plainTextToken
                 return response()->json([
                     'message'=>"sucesso",
                     'token'=> $token->plainTextToken,
                 ]);
             } else{
-                throw new BadRequestException('Senha incorreta!');
+                throw new BadRequestException('Senha incorreta!'.$request->senha.":".$user->senha);
             }
 
             // // early return
@@ -83,7 +84,7 @@ class UsersController extends Controller
             ], 400);
         }
     }
-    
+
     protected function validateLoginFields($request)
     {
         $this->validateField($request, 'email');

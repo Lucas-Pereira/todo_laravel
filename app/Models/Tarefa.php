@@ -5,9 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Projeto;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use  Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Tarefa extends Model
+class Tarefa extends Authenticatable
+
 {
+    use HasFactory, Notifiable, HasApiTokens;
     protected $table = 'tarefa';
     //
 

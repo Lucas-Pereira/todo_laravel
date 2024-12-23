@@ -19,6 +19,7 @@
     </header>
     <script>
 
+        const URL = "http://localhost:8000/api/";
 
         function excluir(id) {
 
@@ -30,7 +31,7 @@
                 'Access-Control-Allow-Origin': '*'
             }
 
-            fetch('http://localhost:8080/api/tarefa/' + id, options)
+            fetch(URL+'tarefa/' + id, options)
                 .then(async function (response) {
                     exclusao = await response;
                     if (exclusao.status == 200) {
@@ -70,7 +71,7 @@
                 headers: header,
             }
 
-            const resultado = await fetch('http://localhost:8080/api/tarefa', options);
+            const resultado = await fetch(URL+'tarefa', options);
             //console.log('resultado',resultado);
 
             const json = await resultado.json();
@@ -136,30 +137,27 @@
 
             selector = document.getElementById("selector");
 
-            let projetoId;
-
             tarefa = {
                 nome: document.getElementById("nome").value,
                 descricao: document.getElementById("descricao").value,
                 completo: false,
                 prioridade: document.getElementById("prioridade").value,
-                projeto: {
-                    id: selector.value
-                }
+                projeto_id:selector.value
 
             }
             console.log(tarefa);
 
             let header = new Headers();
-            header.append('Authorization', window.localStorage.getItem('token'))
+            //header.append('Authorization', window.localStorage.getItem('token'))
             header.append("Content-type", "application/json");
+            header.append("authorization", window.localStorage.getItem('token'));
             const options = {
                 method: "POST",
                 headers: header,
                 body: JSON.stringify(tarefa)
             }
 
-            response = await fetch("http://localhost:8080/api/tarefa", options);
+            response = await fetch(URL+'tarefa', options);
             if (response.status == 201) {
                 alert("Tarefa criada com sucesso");
             }
@@ -189,7 +187,7 @@
             }
 
 
-            const resultado = await fetch('http://localhost:8080/api/projeto', options)
+            const resultado = await fetch(URL+'projeto', options)
             const listaDeProjetos = await resultado.json();
 
             console.log(listaDeProjetos);
@@ -215,7 +213,7 @@
          .then(response => response.json())
          .then(data => console.log(data))
          .catch(error => console.error('Error:', error));
-         
+
          console.log(tarefa);
          window.alert(tarefa);*/
         tarefa();
@@ -252,7 +250,7 @@
         </div>
     </div>
 
-    <!-- 
+    <!--
     Nome: Fazer compras
     Prioridade: 1    Completo? Não
     Descrição: Leite, Frango, Carne, Pão, Arroz, Feijão
