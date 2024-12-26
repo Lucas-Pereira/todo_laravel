@@ -13,7 +13,8 @@ class Projeto extends Model
     protected $table = 'projeto';
 
     protected $fillable = [
-        'nome'
+        'nome',
+        'user_id'
     ];
 
     public function user(): BelongsTo

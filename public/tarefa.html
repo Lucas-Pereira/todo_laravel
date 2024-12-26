@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="css/cabecalho.css">
     <title>Tarefas</title>
 </head>
-<bod>
 
+<body>
     <header>
         <menu>
             <a href="projeto.html">Projeto</a>
@@ -25,13 +25,14 @@
 
             let header = new Headers();
             header.append('Authorization', window.localStorage.getItem('token'));
+            header.append('Accept', 'application/json');
             options = {
                 headers: header,
                 method: "DELETE",
                 'Access-Control-Allow-Origin': '*'
             }
 
-            fetch(URL+'tarefa/' + id, options)
+            fetch(URL + 'tarefa/' + id, options)
                 .then(async function (response) {
                     exclusao = await response;
                     if (exclusao.status == 200) {
@@ -53,8 +54,8 @@
                 });
         }
 
-        function cancelar() {
-            adicionarBody = document.getElementById("adicionarContent");
+        function cancelar(tipoDeAcao) {
+            adicionarBody = document.getElementById(tipoDeAcao);
             adicionarBody.style.display = "none";
             //zerar os inputs
             tarefa();
@@ -65,13 +66,15 @@
         async function tarefa() {
 
             let header = new Headers();
-            header.append('Authorization', window.localStorage.getItem('token'))
+            header.append('Authorization', window.localStorage.getItem('token'));
+            header.append('Accept', 'application/json');
+            header.append('Access-Control-Allow-Origin', "*");
             const options = {
                 method: "GET",
                 headers: header,
             }
 
-            const resultado = await fetch(URL+'tarefa', options);
+            const resultado = await fetch(URL + 'tarefa', options);
             //console.log('resultado',resultado);
 
             const json = await resultado.json();
@@ -97,7 +100,7 @@
                     + "<td>" + json[i].descricao + "</td>"
                     + "<td>" + json[i].descricao + "</td>"
                     + "<td>"
-                    + "<button class='w3-button w3-yellow' onclick=editar(" + json[i].id + ")>Editar</button>"
+                    + "<button class='w3-button w3-yellow' onclick=editarTarefa(" + json[i].id + ")>Editar</button>"
                     + "<button class='w3-button w3-red' onclick=excluir(" + json[i].id + ") id ='excluir'>excluir</button>"
                     + "</td>"
                     + "</tr>";
@@ -122,14 +125,28 @@
 
         //*********************************////
 
-        function adicionar() {
+        function adicionar(tipoDeAcao) {
 
-            adicionarBody = document.getElementById("adicionarContent");
+            adicionarBody = document.getElementById(tipoDeAcao);
             adicionarBody.style.display = "block";
         }
 
-        function editar() {
-            adicionar();
+        async function editarTarefa(id) {
+            adicionar('editarContent');
+
+
+            let header = new Headers();
+            header.append('Authorization', window.localStorage.getItem('token'));
+            header.append('Accept', 'application/json');
+            const options = {
+                method: "GET",
+                headers: header,
+            }
+
+            const resultado = await fetch(URL + 'tarefa/' + id, options);
+
+            const json = await resultado.json();
+            console.log(json);
         }
 
         //----------------------------////
@@ -142,7 +159,7 @@
                 descricao: document.getElementById("descricao").value,
                 completo: false,
                 prioridade: document.getElementById("prioridade").value,
-                projeto_id:selector.value
+                projeto_id: selector.value
 
             }
             console.log(tarefa);
@@ -150,6 +167,7 @@
             let header = new Headers();
             //header.append('Authorization', window.localStorage.getItem('token'))
             header.append("Content-type", "application/json");
+            header.append('Accept', 'application/json');
             header.append("authorization", window.localStorage.getItem('token'));
             const options = {
                 method: "POST",
@@ -157,7 +175,7 @@
                 body: JSON.stringify(tarefa)
             }
 
-            response = await fetch(URL+'tarefa', options);
+            response = await fetch(URL + 'tarefa', options);
             if (response.status == 201) {
                 alert("Tarefa criada com sucesso");
             }
@@ -181,13 +199,14 @@
 
             let header = new Headers();
             header.append('Authorization', window.localStorage.getItem('token'))
+            header.append('Accept', 'application/json');
             const options = {
                 method: "GET",
                 headers: header,
             }
 
 
-            const resultado = await fetch(URL+'projeto', options)
+            const resultado = await fetch(URL + 'projeto', options)
             const listaDeProjetos = await resultado.json();
 
             console.log(listaDeProjetos);
@@ -223,8 +242,10 @@
     <p>
     <h3 style="color: tomato "> Lista de tarefas</h3>
     </p>
-    <button class="w3-button w3-circle w3-teal botaoAdicionar" id="float" onclick="adicionar()">+</button>
+    <button class="w3-button w3-circle w3-teal botaoAdicionar" id="float"
+        onclick="adicionar('adicionarContent')">+</button>
 
+    <!--Modal adicionar tarefa -->
     <div class="w3-container edit-container w3-card " id="adicionarContent" style="display: none;" style="width:60%">
         <h3>Adicionar tarefas</h3>
         <div class="w3-container" width="50vw">
@@ -244,7 +265,34 @@
 
             <div id="button">
                 <button class="w3-btn w3-blue-grey" onclick="criarTarefa()">Adicionar</button>
-                <button class="w3-btn w3-yellow" onclick="cancelar()">Cancelar</button>
+                <button class="w3-btn w3-yellow" onclick="cancelar('adicionarContent')">Cancelar</button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!--Modal editar tarefa -->
+    <div class="w3-container edit-container w3-card " id="editarContent" style="display: none;" style="width:60%">
+        <h3>Editar tarefas</h3>
+        <div class="w3-container" width="50vw">
+            <label class="w3-text"><b>Nome</b></label>
+            <input class="w3-input w3-border w3-light-grey" type="text" id="nomeEdicao">
+
+            <label class="w3-text"><b>Prioridade</b></label>
+            <input class="w3-input w3-border w3-light-grey" type="text" id="prioridadeEdicao">
+
+            <label class="w3-text"><b>Descição</b></label>
+            <textarea class="w3-input w3-border w3-light-grey" name="w3review" rows="4" cols="50"
+                id="descricaoEdicao"></textarea>
+
+            <select class="w3-select w3-border w3-margin-top" name="projeto" id="selectorEdicao">
+                <option value="" disabled selected>Vincular a um projeto</option>
+            </select>
+
+            <div id="button">
+                <button class="w3-btn w3-blue-grey" onclick="EditarTarefa()">editar</button>
+                <button class="w3-btn w3-yellow" onclick="cancelar('editarContent')">Cancelar</button>
             </div>
 
         </div>
@@ -279,6 +327,6 @@
     </div>
 
 
-    </body>
+</body>
 
 </html>

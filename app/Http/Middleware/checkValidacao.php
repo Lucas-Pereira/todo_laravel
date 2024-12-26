@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+
+//Manter middelware
 class checkValidacao
 {
     /**
@@ -16,11 +18,11 @@ class checkValidacao
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->bearerToken() === 'token-name' ) {
-
+      /*  if ($request->bearerToken() === 'token-name' ) {
+            var_dump($request->bearerToken());
             return $next($request);
           } else {
-            return redirect()->route('home');
-          }
+            return redirect()->route('index.html');
+          }*/
     }
 }

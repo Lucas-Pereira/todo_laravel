@@ -19,7 +19,7 @@ class UsersController extends Controller
 
     public function store(Request $request){
         $user = User::create([
-            'name' => $request->name,
+            'name' => $request->nome,
             'senha' => Hash::make($request->senha),
             'email' => $request->email]);
         return response()->json($user);
@@ -59,7 +59,7 @@ class UsersController extends Controller
                 $token = $user->createToken('token-name');//->plainTextToken
                 return response()->json([
                     'message'=>"sucesso",
-                    'token'=> $token->plainTextToken,
+                    'token'=> 'Bearer '.$token->plainTextToken,
                 ]);
             } else{
                 throw new BadRequestException('Senha incorreta!'.$request->senha.":".$user->senha);

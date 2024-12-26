@@ -30,23 +30,28 @@
             alert('vamos sair');
         }
 
-        async function criarProjeto() {
+        window.criarProjeto = async function () {
 
-            let projeto = document.getElementById("nome").value;
-            if (projeto == "") {
+            const projeto = {
+                'nome': document.getElementById("nome").value
+            }
+
+            if (projeto.nome == "") {
                 alert("Projeto não pode ser vazio")
                 return;
             }
+            console.log(projeto);
             let header = new Headers();
             header.append('Authorization', window.localStorage.getItem('token'))
             header.append("Content-type", "application/json");
+            header.append('Accept', 'application/json');
             const options = {
                 method: "POST",
                 headers: header,
                 body: JSON.stringify(projeto)
             }
 
-            response = await fetch("http://localhost:8000/api/projeto", options);
+            const response = await fetch("http://localhost:8000/api/projeto", options);
             if (response.status == 201) {
 
                 console.log(projeto);
@@ -72,16 +77,17 @@
         window.listarTarefas = async function (id_projeto) {
 
             let header = new Headers();
-            header.append('Authorization', window.localStorage.getItem('token'))
+            header.append('Authorization', window.localStorage.getItem('token'));
+            header.append('Accept', 'application/json');
             const options = {
                 method: "GET",
                 headers: header,
             }
 
-            const resultado = await fetch("http://localhost:8000/api/projeto/" + id_projeto + "/tarefas", options);
+            const jsonTarefa = await fetch("http://localhost:8000/api/projeto/" + id_projeto + "/tarefas", options);
             //console.log('resultado',resultado);
 
-            const json = await resultado.json();
+            const resposta = await jsonTarefa.json();
             //console.log('json',json);
 
             //document.getElementById('tarefas').innerHTML = JSON.stringify(json);
@@ -98,12 +104,12 @@
 
 
 
-            for (let i = 0; i < json.length; i++) {
+            for (let i = 0; i < resposta.length; i++) {
 
                 let dataBody = "<tr>"
-                    + "<td>" + json[i].nome + "</td>"
-                    + "<td>" + json[i].descricao + "</td>"
-                    + "<td>" + (json[i].completo ? "sim" : "não") + "</td>"
+                    + "<td>" + resposta[i].nome + "</td>"
+                    + "<td>" + resposta[i].descricao + "</td>"
+                    + "<td>" + (resposta[i].completo ? "sim" : "não") + "</td>"
                     + "</tr>";
 
 
@@ -114,16 +120,10 @@
             tabela += "</table>";
 
             document.getElementById('resultado').innerHTML = tabela;
-            if (json.length <= 0) {
-                let semProjetosMensagem = "<div class='w3-card w3-padding-16 w3-center' > Não há tarefas vinculas a este projeto </div>"
+            if (resposta.length <= 0) {
+                let semProjetosMensagem = "<div class='w3-card w3-padding-16 w3-center' >Não há tarefas </div>"
                 document.getElementById("resultado").innerHTML = semProjetosMensagem;
             }
-
-
-            console.log(json.length);
-            console.log(json[0].id);
-            console.log(json[0].nome);
-            console.log(json[0].descricao);
 
 
         }// fim função
@@ -134,6 +134,7 @@
 
             let header = new Headers();
             header.append('Authorization', window.localStorage.getItem('token'))
+            header.append('Accept', 'application/json');
             const options = {
                 method: "GET",
                 headers: header,
@@ -141,7 +142,9 @@
 
             const response = await fetch('http://localhost:8000/api/projeto', options);
             const projetos = await response.json();
-            console.log(projetos);
+
+            //console.log(projetos);
+            //console.log(projetos[0][0].nome);
             let lista = "";
 
 
@@ -160,11 +163,12 @@
 
         /* */
         /*excluir*/
-        function excluir(id) {
+        window.excluir = function (id){
 
             let header = new Headers();
             header.append('Authorization', window.localStorage.getItem('token'));
-            options = {
+            header.append('Accept', 'application/json');
+            const options = {
                 headers: header,
                 method: "DELETE",
                 'Access-Control-Allow-Origin': '*'
@@ -172,7 +176,7 @@
 
             fetch('http://localhost:8000/api/projeto/' + id, options)
                 .then(async function (response) {
-                    exclusao = await response;
+                    let exclusao = await response;
                     if (exclusao.status == 200) {
 
                         console.log("funcionou => ");
@@ -222,17 +226,20 @@
             let header = new Headers();
             let nome = document.getElementById("nomeEdicao").value;
             let id = document.getElementById("idEdicao").value;
-
+            const user = {
+             'nome':nome
+            }
             header.append('Authorization', window.localStorage.getItem('token'));
             header.append("Content-type", "application/json");
+            header.append('Accept', 'application/json');
             let options = {
                 headers: header,
                 method: "PUT",
                 'Access-Control-Allow-Origin': '*',
-                body: JSON.stringify(nome)
+                body: JSON.stringify(user)
             }
 
-            fetch('http://localhost:8080/api/projeto/' + id, options)
+            fetch('http://localhost:8000/api/projeto/' + id, options)
                 .then(async function (response) {
                     let edicao = await response;
                     if (edicao.status == 200) {
@@ -311,7 +318,6 @@
                         <div class="w3-container w3-padding">
                             <label class="w3-text"><b>Nome</b></label>
                             <input class="w3-input w3-border w3-light-grey" type="text" id="nomeEdicao">
-
                             <input type="text" disabled id="idEdicao">
                         </div>
                         <footer class="w3-container w3-teal">
