@@ -36,7 +36,7 @@
                 .then(async function (response) {
                     exclusao = await response;
                     if (exclusao.status == 200) {
-                        tarefa();
+                        getTarefa();
                         console.log("funcionou => ");
                     }
                     if (response.status == 400) {
@@ -54,16 +54,16 @@
                 });
         }
 
-        function cancelar(tipoDeAcao) {
+        function fecharModal(tipoDeAcao) {
             adicionarBody = document.getElementById(tipoDeAcao);
             adicionarBody.style.display = "none";
             //zerar os inputs
-            tarefa();
+            getTarefa();
             //resetar inputs
         }
 
 
-        async function tarefa() {
+        async function getTarefa() {
 
             let header = new Headers();
             header.append('Authorization', window.localStorage.getItem('token'));
@@ -78,6 +78,7 @@
             //console.log('resultado',resultado);
 
             const json = await resultado.json();
+            window.tarefas = json;
             //console.log('json',json);
 
             //document.getElementById('tarefas').innerHTML = JSON.stringify(json);
@@ -100,7 +101,7 @@
                     + "<td>" + json[i].descricao + "</td>"
                     + "<td>" + json[i].descricao + "</td>"
                     + "<td>"
-                    + "<button class='w3-button w3-yellow' onclick=editarTarefa(" + json[i].id + ")>Editar</button>"
+                    + "<button class='w3-button w3-yellow' onclick=mostrarTelaEditar(" + json[i].id + ")>Editar</button>"
                     + "<button class='w3-button w3-red' onclick=excluir(" + json[i].id + ") id ='excluir'>excluir</button>"
                     + "</td>"
                     + "</tr>";
@@ -115,108 +116,10 @@
 
             document.getElementById('resultado').innerHTML = tabela;
 
-            console.log(json.length);
-            console.log(json[0].id);
-            console.log(json[0].nome);
-            console.log(json[0].descricao);
-        }// fim função
-
-
-
-        //*********************************////
-
-        function adicionar(tipoDeAcao) {
-
-            adicionarBody = document.getElementById(tipoDeAcao);
-            adicionarBody.style.display = "block";
-        }
-
-        async function editarTarefa(id) {
-            adicionar('editarContent');
-
-
-            let header = new Headers();
-            header.append('Authorization', window.localStorage.getItem('token'));
-            header.append('Accept', 'application/json');
-            const options = {
-                method: "GET",
-                headers: header,
-            }
-
-            const resultado = await fetch(URL + 'tarefa/' + id, options);
-
-            const json = await resultado.json();
-            console.log(json);
-        }
-
-        //----------------------------////
-        async function criarTarefa() {
-
-            selector = document.getElementById("selector");
-
-            tarefa = {
-                nome: document.getElementById("nome").value,
-                descricao: document.getElementById("descricao").value,
-                completo: false,
-                prioridade: document.getElementById("prioridade").value,
-                projeto_id: selector.value
-
-            }
-            console.log(tarefa);
-
-            let header = new Headers();
-            //header.append('Authorization', window.localStorage.getItem('token'))
-            header.append("Content-type", "application/json");
-            header.append('Accept', 'application/json');
-            header.append("authorization", window.localStorage.getItem('token'));
-            const options = {
-                method: "POST",
-                headers: header,
-                body: JSON.stringify(tarefa)
-            }
-
-            response = await fetch(URL + 'tarefa', options);
-            if (response.status == 201) {
-                alert("Tarefa criada com sucesso");
-            }
-            if (response.status == 400) {
-                error = await response.json();
-
-                errorContainer = document.getElementById("error");
-                errorContainer.style.display = "block";
-                document.getElementById("error_message").innerHTML = error.error;
-
-                document.getElementById("closeButtonError").onclick = function () {
-                    errorContainer.style.display = "none";
-                }
-            }
-
-        }
-
-        //******************************************//
-
-        async function getTarefas() {
-
-            let header = new Headers();
-            header.append('Authorization', window.localStorage.getItem('token'))
-            header.append('Accept', 'application/json');
-            const options = {
-                method: "GET",
-                headers: header,
-            }
-
-
-            const resultado = await fetch(URL + 'projeto', options)
-            const listaDeProjetos = await resultado.json();
-
-            console.log(listaDeProjetos);
-
-
-            //<option value="3">Option 3</option>
-
-
-
             selector = document.getElementById('selector');
+            const listaDeProjetos = await getProjetos();
+            selector.value = "";
+
 
             for (i = 0; i < listaDeProjetos.length; i++) {
                 //options = "<option value="+lista.id+">"+lista.nome+"</option>";
@@ -224,18 +127,191 @@
                 selector.add(option);
             }
 
+            return json;
+        }// fim função
+
+
+
+        //*********************************////
+
+        function mostrarModal(tipoDeAcao) {
+
+            adicionarBody = document.getElementById(tipoDeAcao);
+            adicionarBody.style.display = "block";
         }
 
-        getTarefas();
+        async function mostrarTelaEditar(id) {
+            mostrarModal('modalEditar');
 
-        /*const tarefa = fetch('http://localhost:8080/api/tarefas', {headers})
-         .then(response => response.json())
-         .then(data => console.log(data))
-         .catch(error => console.error('Error:', error));
+            // desafio fazer com foreach
 
-         console.log(tarefa);
-         window.alert(tarefa);*/
-        tarefa();
+            const tarefas = window.tarefas;//await getTarefa();
+            const projetos = await getProjetos();
+
+            let tarefaEditar = null;
+            for (i = 0; i < tarefas.length; i++) {
+                if (tarefas[i].id == id) {
+                    tarefaEditar = tarefas[i];
+                    break;
+                }
+
+            }
+
+            document.getElementById('idEdicao').value = tarefaEditar.id
+            document.getElementById("nomeEdicao").value = tarefaEditar.nome;
+            document.getElementById("descricaoEdicao").value = tarefaEditar.descricao;
+            document.getElementById("prioridadeEdicao").value = tarefaEditar.prioridade;
+            document.getElementById('selectorEdicao') = new HTMLSelectElement();
+            selectorEdicao = document.getElementById('selectorEdicao');
+            selectorEdicao.value = tarefaEditar.projeto_id;
+
+            selectorEdicao.innerHTML = "";
+
+            let option = "";
+            let index = "";
+            for (i = 0; i < projetos.length; i++){
+                if (projetos[i].id == tarefaEditar.projeto_id)
+                    index = i;
+
+                    option = new Option(projetos[i].nome, projetos[i].id);
+                    selectorEdicao.add(option);
+                }
+
+
+                selectorEdicao.options[index].selected = true;
+
+
+                // colocar o projeto.nome dentro do value do input nomeEdicao
+                // value do input nomeEdicao = projeto.nome (projetoEditar.nome)
+                // document.getElementById('nomeEdicao').value = projetoEditar.nome;
+                //document.getElementById('idEdicao').value = projetoEditar.id;
+            }
+
+            async function editarTarefa() {
+
+
+                tarefa = {
+                    id: document.getElementById('idEdicao').value,
+                    nome: document.getElementById("nomeEdicao").value,
+                    descricao: document.getElementById("descricaoEdicao").value,
+                    completo: false,
+                    prioridade: document.getElementById("prioridadeEdicao").value,
+                    projeto_id: selectorEdicao.value
+
+                }
+                console.log(tarefa);
+
+                let header = new Headers();
+                header.append('Authorization', window.localStorage.getItem('token'));
+                header.append('Accept', 'application/json');
+                header.append("Content-type", "application/json");
+                const options = {
+                    method: "PUT",
+                    headers: header,
+                    body: JSON.stringify(tarefa)
+                }
+
+
+                console.log(tarefa);
+                let resultado = await fetch('http://localhost:8000/api/tarefa/' + tarefa.id, options)
+
+                if (resultado.status == 200) {
+                    console.log("funcionou => ");
+                    location.reload(true);
+                } else {
+                    let error = await response.json();
+
+                    let errorContainer = document.getElementById("error");
+                    errorContainer.style.display = "block";
+                    document.getElementById("error_message").innerHTML = error.error;
+
+                    document.getElementById("closeButtonError").onclick = function () {
+                        errorContainer.style.display = "none";
+                    }
+                }
+
+            }
+
+            //----------------------------////
+            async function criarTarefa() {
+
+                selector = document.getElementById('selector');
+
+                tarefa = {
+
+                    nome: document.getElementById("nome").value,
+                    descricao: document.getElementById("descricao").value,
+                    completo: false,
+                    prioridade: document.getElementById("prioridade").value,
+                    projeto_id: selector.value
+
+                }
+
+
+
+
+                console.log(tarefa);
+
+                let header = new Headers();
+                //header.append('Authorization', window.localStorage.getItem('token'))
+                header.append("Content-type", "application/json");
+                header.append('Accept', 'application/json');
+                header.append("authorization", window.localStorage.getItem('token'));
+                const options = {
+                    method: "POST",
+                    headers: header,
+                    body: JSON.stringify(tarefa)
+                }
+
+                response = await fetch(URL + 'tarefa', options);
+                if (response.status == 201 || response.status == 200) {
+                    alert("Tarefa criada com sucesso");
+                    location.reload(true);
+                }
+                if (response.status == 400) {
+                    error = await response.json();
+
+                    errorContainer = document.getElementById("error");
+                    errorContainer.style.display = "block";
+                    document.getElementById("error_message").innerHTML = error.error;
+
+                    document.getElementById("closeButtonError").onclick = function () {
+                        errorContainer.style.display = "none";
+                    }
+                }
+
+            }
+
+            //******************************************//
+
+            async function getProjetos() {
+
+                let header = new Headers();
+                header.append('Authorization', window.localStorage.getItem('token'))
+                header.append('Accept', 'application/json');
+                const options = {
+                    method: "GET",
+                    headers: header,
+                }
+
+
+                const resultado = await fetch(URL + 'projeto', options)
+                const listaDeProjetos = await resultado.json();
+
+                //<option value="3">Option 3</option>
+                return listaDeProjetos;
+            }
+
+
+
+            /*const tarefa = fetch('http://localhost:8080/api/tarefas', {headers})
+             .then(response => response.json())
+             .then(data => console.log(data))
+             .catch(error => console.error('Error:', error));
+
+             console.log(tarefa);
+             window.alert(tarefa);*/
+            getTarefa();
     </script>
 
 
@@ -243,12 +319,14 @@
     <h3 style="color: tomato "> Lista de tarefas</h3>
     </p>
     <button class="w3-button w3-circle w3-teal botaoAdicionar" id="float"
-        onclick="adicionar('adicionarContent')">+</button>
+        onclick="mostrarModal('modalAdicionar')">+</button>
 
     <!--Modal adicionar tarefa -->
-    <div class="w3-container edit-container w3-card " id="adicionarContent" style="display: none;" style="width:60%">
+    <div class="w3-container edit-container w3-card " id="modalAdicionar" style="display: none;" style="width:60%">
         <h3>Adicionar tarefas</h3>
         <div class="w3-container" width="50vw">
+            <input type="hidden" id="idEdicao">
+
             <label class="w3-text"><b>Nome</b></label>
             <input class="w3-input w3-border w3-light-grey" type="text" id="nome">
 
@@ -265,7 +343,7 @@
 
             <div id="button">
                 <button class="w3-btn w3-blue-grey" onclick="criarTarefa()">Adicionar</button>
-                <button class="w3-btn w3-yellow" onclick="cancelar('adicionarContent')">Cancelar</button>
+                <button class="w3-btn w3-yellow" onclick="fecharModal('modalAdicionar')">Cancelar</button>
             </div>
 
         </div>
@@ -273,7 +351,7 @@
 
 
     <!--Modal editar tarefa -->
-    <div class="w3-container edit-container w3-card " id="editarContent" style="display: none;" style="width:60%">
+    <div class="w3-container edit-container w3-card " id="modalEditar" style="display: none;" style="width:60%">
         <h3>Editar tarefas</h3>
         <div class="w3-container" width="50vw">
             <label class="w3-text"><b>Nome</b></label>
@@ -291,8 +369,8 @@
             </select>
 
             <div id="button">
-                <button class="w3-btn w3-blue-grey" onclick="EditarTarefa()">editar</button>
-                <button class="w3-btn w3-yellow" onclick="cancelar('editarContent')">Cancelar</button>
+                <button class="w3-btn w3-blue-grey" onclick="editarTarefa()">editar</button>
+                <button class="w3-btn w3-yellow" onclick="fecharModal('modalEditar')">Cancelar</button>
             </div>
 
         </div>
