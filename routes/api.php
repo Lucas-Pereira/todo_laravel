@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tarefa/{id}', [TarefaController::class, 'getTarefaById']);
     Route::post('/tarefa', [TarefaController::class, 'store']);
     Route::put('/tarefa/{id}', [TarefaController::class, 'update']);
+    Route::put('/tarefa/completar/{id}', [TarefaController::class, 'completarTarefa']);
     Route::delete('/tarefa/{id}', [TarefaController::class, 'destroy']);
 
     //Route::apiResource('/projeto', ProjetoController::class);

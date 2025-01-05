@@ -89,6 +89,25 @@ class TarefaController extends Controller
         }
     }
 
+    public function completarTarefa(Request $request, $id)
+    {
+        try {
+            $tarefa = DB::table('tarefa')
+                ->where('id', $id)
+                ->update([
+                    'completo' => $request->completo,
+                    'user_id' => Auth::id(),
+                ]);
+
+            return response()->json($tarefa);
+
+        } catch (Exception $e) {
+            throw new Exception("Erro na atualização: " . $e);
+
+        }
+    }
+
+
     public function destroy($id)
     {
 
