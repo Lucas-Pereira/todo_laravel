@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="css/cabecalho.css">
     <title>Tarefas</title>
 </head>
@@ -36,6 +38,7 @@
                 .then(async function (response) {
                     exclusao = await response;
                     if (exclusao.status == 200) {
+                        alert("tarefa excluída com sucesso!");
                         getTarefa();
                         console.log("funcionou => ");
                     }
@@ -101,8 +104,8 @@
                     + "<td>" + json[i].descricao + "</td>"
                     + "<td>" + json[i].descricao + "</td>"
                     + "<td>"
-                    + "<button class='w3-button w3-yellow' onclick=mostrarTelaEditar(" + json[i].id + ")>Editar</button>"
-                    + "<button class='w3-button w3-red' onclick=excluir(" + json[i].id + ") id ='excluir'>excluir</button>"
+                    + "<button class=' button' onclick=mostrarTelaEditar(" + json[i].id + ")><i class='material-icons'>edit</i>Editar</button>"
+                    + "<button class=' button' onclick=excluir(" + json[i].id + ") id ='excluir'><i class='material-icons'>delete</i>excluir</button>"
                     + "</td>"
                     + "</tr>";
 
@@ -115,10 +118,11 @@
 
 
             document.getElementById('resultado').innerHTML = tabela;
-
+            //Alternativa encontrada para reverter o bug de concatenação de projetos
+            selector.innerHTML = "";
             selector = document.getElementById('selector');
             const listaDeProjetos = await getProjetos();
-            selector.value = "";
+
 
 
             for (i = 0; i < listaDeProjetos.length; i++) {
@@ -161,7 +165,7 @@
             document.getElementById("nomeEdicao").value = tarefaEditar.nome;
             document.getElementById("descricaoEdicao").value = tarefaEditar.descricao;
             document.getElementById("prioridadeEdicao").value = tarefaEditar.prioridade;
-            document.getElementById('selectorEdicao') = new HTMLSelectElement();
+            //document.getElementById('selectorEdicao') = new HTMLSelectElement();
             selectorEdicao = document.getElementById('selectorEdicao');
             selectorEdicao.value = tarefaEditar.projeto_id;
 
@@ -211,13 +215,11 @@
                     body: JSON.stringify(tarefa)
                 }
 
-
-                console.log(tarefa);
                 let resultado = await fetch('http://localhost:8000/api/tarefa/' + tarefa.id, options)
 
                 if (resultado.status == 200) {
                     console.log("funcionou => ");
-                    location.reload(true);
+                    window.getTarefa();
                 } else {
                     let error = await response.json();
 
@@ -266,7 +268,7 @@
                 response = await fetch(URL + 'tarefa', options);
                 if (response.status == 201 || response.status == 200) {
                     alert("Tarefa criada com sucesso");
-                    location.reload(true);
+                    window.getTarefa();
                 }
                 if (response.status == 400) {
                     error = await response.json();
@@ -316,9 +318,9 @@
 
 
     <p>
-    <h3 style="color: tomato "> Lista de tarefas</h3>
+    <h3> Lista de tarefas</h3>
     </p>
-    <button class="w3-button w3-circle w3-teal botaoAdicionar" id="float"
+    <button class="button  w3-blue-grey w3-circle botaoAdicionar" id="float"
         onclick="mostrarModal('modalAdicionar')">+</button>
 
     <!--Modal adicionar tarefa -->
@@ -342,8 +344,8 @@
             </select>
 
             <div id="button">
-                <button class="w3-btn w3-blue-grey" onclick="criarTarefa()">Adicionar</button>
-                <button class="w3-btn w3-yellow" onclick="fecharModal('modalAdicionar')">Cancelar</button>
+                <button class="button" onclick="criarTarefa()"><i class='material-icons'>add</i>Adicionar</button>
+                <button class="button" onclick="fecharModal('modalAdicionar')"><i class='material-icons'>cancel</i>Cancelar</button>
             </div>
 
         </div>
@@ -369,8 +371,8 @@
             </select>
 
             <div id="button">
-                <button class="w3-btn w3-blue-grey" onclick="editarTarefa()">editar</button>
-                <button class="w3-btn w3-yellow" onclick="fecharModal('modalEditar')">Cancelar</button>
+                <button class="button" onclick="editarTarefa()"><i class='material-icons'>edit</i>editar</button>
+                <button class="button" onclick="fecharModal('modalEditar')"><i class='material-icons'>cancel</i>Cancelar</button>
             </div>
 
         </div>
@@ -401,7 +403,7 @@
     <div id="error" style="text-align: center; width: 50%; display: none;"
         class="w3-card w3-red w3-padding-16 w3-margin w3-display-topmiddle">
         <p id="error_message"></p>
-        <button class="w3-button w3-red w3-card w3-display-topright  w3-padding" id="closeButtonError">X</button>
+        <button class="button w3-card w3-display-topright  w3-padding" id="closeButtonError">X</button>
     </div>
 
 

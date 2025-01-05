@@ -12,5 +12,25 @@ li{
 ul :hover{
     cursor: pointer;
 }
+.buttonContainer{
+    display: flex;
+    flex-direction: row;
+}
+
+button i{
+    font-size: 10px;
+    margin-right:6px;
+}
+button i, button i>span{
+    text-align: center;
+
+}
+
+button i>span{
+    font-size: 15px;
+}
+.button{
+
+}
 
 

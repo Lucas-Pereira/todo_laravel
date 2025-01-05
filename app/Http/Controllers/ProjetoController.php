@@ -12,22 +12,26 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 class ProjetoController extends Controller
 {
     //
-    public function index(){
-        $projeto = Projeto::all();
+    public function index()
+    {
+        $projeto = DB::table('projeto')
+            ->where('user_id', '=', Auth::id())
+            ->select('projeto.*')
+            ->get();
         return response()->json($projeto);
-
     }
 
-    public function getTarefasByProjetoId($id){
+    public function getTarefasByProjetoId($id)
+     {
 
         $tarefas = DB::table('tarefa')
-                   ->join('projeto', 'tarefa.projeto_id', '=', 'projeto.id')
-                   ->select('tarefa.*')
-                   ->where('tarefa.projeto_id','=', $id)
-                   ->get();
+            ->join('projeto', 'tarefa.projeto_id', '=', 'projeto.id')
+            ->select('tarefa.*')
+            ->where('tarefa.projeto_id', '=', $id)
+            ->get();
 
 
-        if($tarefas == null){
+        if ($tarefas == null) {
             throw new BadRequestException("Não há tarefas vinculadas ao projeto!");
         }
 
@@ -36,36 +40,39 @@ class ProjetoController extends Controller
 
 
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
 
         $projeto = DB::table('projeto')
-                   ->insert([
-                    'nome'=> $request->nome,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'user_id' => Auth::id()
-                   ]);
+            ->insert([
+                'nome' => $request->nome,
+                'created_at' => date('Y-m-d H:i:s'),
+                'user_id' => Auth::id()
+            ]);
 
         return response()->json($projeto);
     }
 
-    public function show($id){
+    public function show($id)
+    {
         return Projeto::findOrFail($id);
     }
 
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         $projeto = DB::table('projeto')
-                   ->where('id', $id)
-                   ->update(['nome'=> $request->nome, 'updated_at' => date('Y-m-d H:i:s')]);
+            ->whereraw('id = ' . $id . ' and user_id = ' . Auth::id())
+            ->update(['nome' => $request->nome, 'updated_at' => date('Y-m-d H:i:s')]);
 
-        if(!$projeto) throw new BadRequestException("Não foi possível atualizar o projeto");
+        if (!$projeto) throw new BadRequestException("Não foi possível atualizar o projeto");
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         $projeto = DB::table('projeto')
-                   ->where('id','=', $id)
-                   ->delete();
+            ->whereraw('id = ' . $id . ' and user_id = ' . Auth::id())
+            ->delete();
 
         return response()->json($projeto);
-
     }
 }

@@ -6,7 +6,7 @@
 }
 
 header{
-    background-color: dodgerblue;
+    background-color:#000;;
     text-transform: uppercase;
     padding: 25px;
     margin-bottom: 10px;
@@ -40,9 +40,9 @@ h3{
     transform: translate(-50%,-50%);
     background-color: white;
     width: 100%;
-    color: dodgerblue;
+    color:#444444;
     border: 1px solid rgba(255, 255, 255, 0,5);
 }
 .edit-container label{
-    color: dodgerblue;
+    color: #444444;
 }

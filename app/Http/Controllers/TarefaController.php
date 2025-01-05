@@ -13,7 +13,8 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class TarefaController extends Controller
 {
-    public function index(Request $request){
+    public function index(Request $request)
+    {
 
         /*$bearToken = $request->authorization;
         $token= PersonalAccessToken::findToken($bearToken);
@@ -27,75 +28,76 @@ class TarefaController extends Controller
            $bearToken
         ]);*/
 
+
         $tarefa = DB::table('tarefa')
-                  ->select('tarefa.*')
-                  ->get();
+            ->where('user_id', '=', Auth::id())
+            ->select('tarefa.*')
+            ->get();
 
 
         return response()->json($tarefa);
     }
 
 
-    public function getTarefaById($id){
+    public function getTarefaById($id)
+    {
 
-            $tarefa = DB::table('tabela')
-                      ->where('id', '=', $id)
-                      ->select('tabela.*')
-                      ->get();
+        $tarefa = DB::table('tabela')
+            ->whereraw('id = ' . $id.' and user_id = ' . Auth::id())
+            ->select('tabela.*')
+            ->get();
 
-                      if($tarefa == null) return new Exception("Não existe tarefas");
+        if ($tarefa == null) return new Exception("Não existe tarefas");
 
-                      return response()->json($tarefa);
+        return response()->json($tarefa);
     }
 
-    public function store(Request $request){
-       try{
+    public function store(Request $request)
+    {
+        try {
             $tarefa = Tarefa::create([
                 'nome' => $request->nome,
-                'descricao' =>$request->descricao,
-                'completo' =>$request->completo,
-                'prioridade' =>$request->prioridade,
-                'user_id' =>Auth::id(),
-                'projeto_id' =>$request->projeto_id
+                'descricao' => $request->descricao,
+                'completo' => $request->completo,
+                'prioridade' => $request->prioridade,
+                'user_id' => Auth::id(),
+                'projeto_id' => $request->projeto_id
             ]);
 
             return response()->json($tarefa);
-        }catch(Exception $e){
-            throw new Exception("Não foi possível criar tarefa:<br>".$e);
+        } catch (Exception $e) {
+            throw new Exception("Não foi possível criar tarefa:<br>" . $e);
         }
     }
 
-    public function show($id){
-        return Tarefa::findOrFail($id);
-    }
 
-    public function update(Request $request, $id){
-        try{
-        $tarefa = DB::table('tarefa')
-                  ->where('id', $id)
-                  ->update([
+    public function update(Request $request, $id)
+    {
+        try {
+            $tarefa = DB::table('tarefa')
+                ->where('id', $id)
+                ->update([
                     'nome' => $request->nome,
                     'descricao' => $request->descricao,
                     'completo' => $request->completo,
-                    'prioridade' =>$request->prioridade,
-                    'user_id' =>Auth::id(),
-                    'projeto_id' =>$request->projeto_id
-                  ]);
-            }catch (Exception $e){
-                throw new Exception("Erro na atualização: ".$e);
-            }
+                    'prioridade' => $request->prioridade,
+                    'user_id' => Auth::id(),
+                    'projeto_id' => $request->projeto_id
+                ]);
+        } catch (Exception $e) {
+            throw new Exception("Erro na atualização: " . $e);
+        }
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
 
-        try{
+        try {
             $tarefa = DB::table('tarefa')
-                      ->where('id', '=', $id)
-                      ->delete();
-
-        }catch(Exception $e){
-            throw new Exception("Não foi possível excluir tarefa:<br>".$e);
+                ->whereraw('id = ' . $id. ' and user_id = ' . Auth::id())
+                ->delete();
+        } catch (Exception $e) {
+            throw new Exception("Não foi possível excluir tarefa:<br>" . $e);
         }
-
     }
 }

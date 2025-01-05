@@ -3,3 +3,17 @@ body,html{
     margin: 0;
     box-sizing: border-box;
 }
+
+.button{
+    border: 1px solid #444444;
+    padding: 5px 10px;
+    margin: 5px;
+    color: #444444;
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 750px){
+    .responsive{
+        width: 90vw;
+    }
+}

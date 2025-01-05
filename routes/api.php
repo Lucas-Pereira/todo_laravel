@@ -14,7 +14,7 @@ use App\Http\Middleware\checkValidacao;
 
 
 Route::post('/user/login', [UsersController::class, 'login'])->name('login');
-Route::post('/user', [UsersController::class, 'store']);
+Route::post('/user/registrar', [UsersController::class, 'store']);
 //Route::post('/api/user', [UsersController::class, 'store']);
 //Route::get('/api/user', 'UsersController@getUser')->middleware();
 //Route::get('/api', [UsersController::class, 'index']);
